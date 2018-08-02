@@ -1,20 +1,20 @@
-<form script="cluster_state_highlighting.js" stylesheet="table_decorations.css">
+<dashboard>
   <label>Overview</label>
   <row>
     <panel>
-      <table id="highlight_system_state">
-        <title></title>
+      <table>
         <search>
-          <query>| inputlookup XtremIOClustersLookup | table "Cluster Name" "XtremIO Server" "XIOS Version" "System Start Time" "Volume Count" "Total Capacity" "Physical Space In Use" "Logical Space In Use" "Thin Provisioning Savings" "Compression Ratio" "Dedup Ratio" "Data Reduction Ratio" "Overall Efficiency"</query>
+          <query>| inputlookup XtremIOClustersLookup 
+| table "Cluster Name" "XtremIO Server" "XIOS Version" "System Start Time" "Volume Count" "Total Capacity" "Physical Space In Use" "Logical Space In Use" "Thin Provisioning Savings" "Compression Ratio" "Dedup Ratio" "Data Reduction Ratio" "Overall Efficiency"</query>
         </search>
+        <option name="count">100</option>
+        <option name="drilldown">row</option>
         <drilldown target="Cluster Summary">
-          <link>
-            <![CDATA[
-          cluster_summary?form.cluster=$row.Cluster Name$
-			]]>
+          <link target="_self">
+            <![CDATA[cluster_summary?form.cluster=$row.Cluster Name$]]>
           </link>
         </drilldown>
       </table>
     </panel>
   </row>
-</form>
+</dashboard>

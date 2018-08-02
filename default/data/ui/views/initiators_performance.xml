@@ -1,10 +1,5 @@
 <form>
-  <label>Initiator Perfomance</label>
-  <search id="baseSearch">
-    <query>| `get_xtremio_index` sourcetype=emc:xtremio:rest component=initiators "Cluster Name"="$cluster$" content.name= "$initiator$" |`get_performance_parameters`</query>
-    <earliest>$earliest$</earliest>
-    <latest>$latest$</latest>
-  </search>
+  <label>Initiator Performance</label>
   <fieldset submitButton="true" autoRun="true">
     <input type="time" searchWhenChanged="true">
       <default>
@@ -15,16 +10,14 @@
     <input type="dropdown" token="cluster" searchWhenChanged="false">
       <label>Cluster</label>
       <search>
-        <query>| inputlookup XtremIOClusterNameLookup| table "Cluster Name"</query>
+        <query>| inputlookup XtremIOClustersLookup
+| table "Cluster Name"</query>
       </search>
-      <earliest>$earliest$</earliest>
-      <latest>$latest$</latest>
       <fieldForLabel>Cluster Name</fieldForLabel>
       <fieldForValue>Cluster Name</fieldForValue>
     </input>
     <input type="multiselect" token="initiator" searchWhenChanged="false">
       <label>Initiators</label>
-      <!-- The final value will be surrounded by prefix and suffix -->
       <delimiter>" OR content.name="</delimiter>
       <choice value="*">ALL</choice>
       <search>
@@ -35,14 +28,28 @@
     </input>
   </fieldset>
   <row>
+    <panel depends="$neverset$">
+      <title>baseSearch</title>
+      <table>
+        <search id="baseSearch">
+          <query>`xtremio_index_filter` sourcetype=emc:xtremio:rest component=initiators "Cluster Name"="$cluster$" content.name="$initiator$" 
+| `get_performance_parameters`</query>
+          <earliest>$earliest$</earliest>
+          <latest>$latest$</latest>
+        </search>
+        <option name="count">1</option>
+        <option name="refresh.display">progressbar</option>
+      </table>
+    </panel>
+  </row>
+  <row>
     <panel>
       <title>Read Bandwidth history(MB/s)</title>
       <chart>
         <search base="baseSearch">
-          <query>| timechart  span=10m limit=0   useother=f avg(rd-bw) AS "Read Bandwidth" by content.name</query>
+          <query>| timechart minspan=10m avg(rd-bw) AS "Read Bandwidth" by content.name</query>
         </search>
         <option name="charting.chart">line</option>
-        <option name="charting.axisY2.enabled">undefined</option>
         <option name="charting.axisLabelsX.majorLabelStyle.overflowMode">ellipsisNone</option>
         <option name="charting.axisLabelsX.majorLabelStyle.rotation">0</option>
         <option name="charting.axisTitleX.visibility">visible</option>
@@ -69,10 +76,9 @@
       <title>Write Bandwidth history(MB/s)</title>
       <chart>
         <search base="baseSearch">
-          <query>| timechart span=10m limit=0  useother=f avg(wr-bw) AS "Write Bandwidth" by content.name</query>
+          <query>| timechart minspan=10m avg(wr-bw) AS "Write Bandwidth" by content.name</query>
         </search>
         <option name="charting.chart">line</option>
-        <option name="charting.axisY2.enabled">undefined</option>
         <option name="charting.axisLabelsX.majorLabelStyle.overflowMode">ellipsisNone</option>
         <option name="charting.axisLabelsX.majorLabelStyle.rotation">0</option>
         <option name="charting.axisTitleX.visibility">visible</option>
@@ -101,10 +107,9 @@
       <title>Read IOPS history</title>
       <chart>
         <search base="baseSearch">
-          <query>| timechart  span=10m limit=0  useother=f avg(rd-iops) AS "Read IOPS" by content.name</query>
+          <query>| timechart minspan=10m avg(rd-iops) AS "Read IOPS" by content.name</query>
         </search>
         <option name="charting.chart">line</option>
-        <option name="charting.axisY2.enabled">undefined</option>
         <option name="charting.axisLabelsX.majorLabelStyle.overflowMode">ellipsisNone</option>
         <option name="charting.axisLabelsX.majorLabelStyle.rotation">0</option>
         <option name="charting.axisTitleX.visibility">visible</option>
@@ -131,10 +136,9 @@
       <title>Write IOPS  history</title>
       <chart>
         <search base="baseSearch">
-          <query>| timechart span=10m limit=0   useother=f avg(wr-iops) AS "Write IOPS" by content.name</query>
+          <query>| timechart minspan=10m avg(wr-iops) AS "Write IOPS" by content.name</query>
         </search>
         <option name="charting.chart">line</option>
-        <option name="charting.axisY2.enabled">undefined</option>
         <option name="charting.axisLabelsX.majorLabelStyle.overflowMode">ellipsisNone</option>
         <option name="charting.axisLabelsX.majorLabelStyle.rotation">0</option>
         <option name="charting.axisTitleX.visibility">visible</option>
@@ -163,10 +167,9 @@
       <title>Read Latency  history(µs)</title>
       <chart>
         <search base="baseSearch">
-          <query>| timechart  span=10m limit=0  useother=f avg(rd-latency) AS "Read Latency" by content.name</query>
+          <query>| timechart minspan=10m avg(rd-latency) AS "Read Latency" by content.name</query>
         </search>
         <option name="charting.chart">line</option>
-        <option name="charting.axisY2.enabled">undefined</option>
         <option name="charting.axisLabelsX.majorLabelStyle.overflowMode">ellipsisNone</option>
         <option name="charting.axisLabelsX.majorLabelStyle.rotation">0</option>
         <option name="charting.axisTitleX.visibility">visible</option>
@@ -193,10 +196,9 @@
       <title>Write Latency history(µs)</title>
       <chart>
         <search base="baseSearch">
-          <query>| timechart span=10m limit=0  useother=f avg(wr-latency) AS "Write_Latency" by content.name</query>
+          <query>| timechart minspan=10m avg(wr-latency) AS "Write_Latency" by content.name</query>
         </search>
         <option name="charting.chart">line</option>
-        <option name="charting.axisY2.enabled">undefined</option>
         <option name="charting.axisLabelsX.majorLabelStyle.overflowMode">ellipsisNone</option>
         <option name="charting.axisLabelsX.majorLabelStyle.rotation">0</option>
         <option name="charting.axisTitleX.visibility">visible</option>

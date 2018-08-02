@@ -1,66 +1,87 @@
 <form stylesheet="table_decorations.css">
   <label>Initiator Summary</label>
-  <search id="baseSearch">
-    <query>| `get_xtremio_index` sourcetype=emc:xtremio:rest component=initiators "Cluster Name"="$cluster$"  content.name="$initiator$"| stats values(content.bw) AS bw values(content.iops) AS iops values(content.avg-latency) AS latency by content.name,_time </query>
-    <earliest>-15m</earliest>
-    <latest>now</latest>
-  </search>
   <fieldset submitButton="true" autoRun="true">
     <input type="dropdown" token="cluster" searchWhenChanged="false">
       <label>Cluster</label>
       <search>
-        <query>| inputlookup XtremIOClusterNameLookup |  table "Cluster Name"</query>
+        <query>| inputlookup XtremIOClustersLookup
+| table "Cluster Name"</query>
       </search>
-      <earliest>$earliest$</earliest>
-      <latest>$latest$</latest>
       <fieldForLabel>Cluster Name</fieldForLabel>
       <fieldForValue>Cluster Name</fieldForValue>
     </input>
     <input type="dropdown" token="initiator" searchWhenChanged="false">
       <label>Initiator</label>
-      <!-- The final value will be surrounded by prefix and suffix -->
-      <populatingSearch earliest="-60m@m" latest="now" fieldForLabel="Initiator Name" fieldForValue="Initiator Name">| inputlookup XtremIOInitiatorsLookup | search "Cluster Name" ="$cluster$" | table "Initiator Name"</populatingSearch>
+      <fieldForLabel>Initiator Name</fieldForLabel>
+      <fieldForValue>Initiator Name</fieldForValue>
+      <search>
+        <query>| inputlookup XtremIOInitiatorsLookup where "Cluster Name"="$cluster$" 
+| table "Initiator Name"</query>
+      </search>
     </input>
   </fieldset>
+  <row>
+    <panel depends="$neverset$">
+      <title>baseSearch</title>
+      <table>
+        <search id="baseSearch">
+          <query>`xtremio_index_filter` sourcetype=emc:xtremio:rest component=initiators "Cluster Name"="$cluster$" content.name="$initiator$" 
+| stats values(content.bw) AS bw values(content.iops) AS iops values(content.avg-latency) AS latency by content.name _time</query>
+          <earliest>-15m</earliest>
+          <latest>now</latest>
+        </search>
+        <option name="count">1</option>
+        <option name="refresh.display">progressbar</option>
+      </table>
+    </panel>
+  </row>
   <row>
     <panel>
       <title>Initiator Group</title>
       <single id="initiator_group">
         <search>
-          <query>| inputlookup XtremIOInitiatorsLookup | search "Cluster Name" ="$cluster$" "Initiator Name"="$initiator$"| table "Group Name"</query>
+          <query>| inputlookup XtremIOInitiatorsLookup 
+| search "Cluster Name" ="$cluster$" "Initiator Name"="$initiator$" 
+| table "Group Name"</query>
         </search>
         <option name="drilldown">none</option>
-        <option name="linkView">search</option>
+        <option name="refresh.display">progressbar</option>
       </single>
     </panel>
     <panel>
       <title>connection State</title>
       <single>
         <search>
-          <query>| inputlookup XtremIOInitiatorsLookup | search "Cluster Name" ="$cluster$" "Initiator Name"="$initiator$"| table "Connection State"</query>
-         </search>
+          <query>| inputlookup XtremIOInitiatorsLookup 
+| search "Cluster Name" ="$cluster$" "Initiator Name"="$initiator$" 
+| table "Connection State"</query>
+        </search>
         <option name="drilldown">none</option>
-        <option name="linkView">search</option>
+        <option name="refresh.display">progressbar</option>
       </single>
     </panel>
     <panel>
       <title># connected Targets</title>
       <single id="single1">
         <search>
-          <query>| inputlookup XtremIOInitiatorsLookup | search "Cluster Name" ="$cluster$" "Initiator Name"="$initiator$"| table "Connected Targets"</query>
+          <query>| inputlookup XtremIOInitiatorsLookup 
+| search "Cluster Name" ="$cluster$" "Initiator Name"="$initiator$" 
+| table "Connected Targets"</query>
         </search>
         <option name="drilldown">none</option>
-        <option name="linkView">search</option>
+        <option name="refresh.display">progressbar</option>
       </single>
     </panel>
     <panel>
       <title>Port Address</title>
       <single id="initiator_port">
         <search>
-          <query>| inputlookup XtremIOInitiatorsLookup | search "Cluster Name" ="$cluster$" "Initiator Name"="$initiator$"| table "Port Address"</query>
-         </search>
+          <query>| inputlookup XtremIOInitiatorsLookup 
+| search "Cluster Name" ="$cluster$" "Initiator Name"="$initiator$" 
+| table "Port Address"</query>
+        </search>
         <option name="drilldown">none</option>
-        <option name="linkView">search</option>
+        <option name="refresh.display">progressbar</option>
       </single>
     </panel>
   </row>
@@ -68,11 +89,9 @@
     <panel>
       <title>Bandwidth(MB/s)</title>
       <chart>
-        <search  base="baseSearch">
-         <query>|  timechart span=1m  latest(bw) AS Bandwidth</query>
+        <search base="baseSearch">
+          <query>| timechart latest(bw) AS Bandwidth</query>
         </search>
-        <option name="charting.chart">line</option>
-        <option name="charting.axisY2.enabled">undefined</option>
         <option name="charting.axisLabelsX.majorLabelStyle.overflowMode">ellipsisNone</option>
         <option name="charting.axisLabelsX.majorLabelStyle.rotation">0</option>
         <option name="charting.axisTitleX.visibility">visible</option>
@@ -81,6 +100,7 @@
         <option name="charting.axisX.scale">linear</option>
         <option name="charting.axisY.scale">linear</option>
         <option name="charting.axisY2.scale">inherit</option>
+        <option name="charting.chart">line</option>
         <option name="charting.chart.bubbleMaximumSize">50</option>
         <option name="charting.chart.bubbleMinimumSize">10</option>
         <option name="charting.chart.bubbleSizeBy">area</option>
@@ -92,31 +112,30 @@
         <option name="charting.layout.splitSeries">0</option>
         <option name="charting.legend.labelStyle.overflowMode">ellipsisMiddle</option>
         <option name="charting.legend.placement">right</option>
-     </chart>
-  <html>
+        <option name="refresh.display">progressbar</option>
+      </chart>
+      <html>
        <div class="performance_drilldown">
-            <a href=" /app/EMC-app-XtremIO/initiators_performance?form.cluster=$form.cluster$&amp;form.initiator=$form.initiator$"  target="Initiator Performance">
-                    View Performance Details
-             </a>
+            <a href=" /app/EMC-app-XtremIO/initiators_performance?form.cluster=$form.cluster$&amp;form.initiator=$form.initiator$" target="Initiator Performance">View Performance Details</a>
         </div>
       </html>
     </panel>
     <panel>
       <title>IOPS</title>
       <chart>
-       <search base="baseSearch">
-          <query>| timechart span=1m   latest(iops) AS "Iops"</query>
+        <search base="baseSearch">
+          <query>| timechart latest(iops) AS "Iops"</query>
         </search>
-        <option name="charting.chart">line</option>
-        <option name="charting.axisY2.enabled">undefined</option>
         <option name="charting.axisLabelsX.majorLabelStyle.overflowMode">ellipsisNone</option>
         <option name="charting.axisLabelsX.majorLabelStyle.rotation">0</option>
         <option name="charting.axisTitleX.visibility">visible</option>
+        <option name="charting.axisTitleY.text">IOPS</option>
         <option name="charting.axisTitleY.visibility">visible</option>
         <option name="charting.axisTitleY2.visibility">visible</option>
         <option name="charting.axisX.scale">linear</option>
         <option name="charting.axisY.scale">linear</option>
         <option name="charting.axisY2.scale">inherit</option>
+        <option name="charting.chart">line</option>
         <option name="charting.chart.bubbleMaximumSize">50</option>
         <option name="charting.chart.bubbleMinimumSize">10</option>
         <option name="charting.chart.bubbleSizeBy">area</option>
@@ -126,15 +145,13 @@
         <option name="charting.chart.style">shiny</option>
         <option name="charting.drilldown">all</option>
         <option name="charting.layout.splitSeries">0</option>
-        <option name="charting.axisTitleY.text">IOPS</option>
         <option name="charting.legend.labelStyle.overflowMode">ellipsisMiddle</option>
         <option name="charting.legend.placement">right</option>
-    </chart>
+        <option name="refresh.display">progressbar</option>
+      </chart>
       <html>
        <div class="performance_drilldown">
-            <a href=" /app/EMC-app-XtremIO/initiators_performance?form.cluster=$form.cluster$&amp;form.initiator=$form.initiator$" target="Initiator Performance">
-                    View Performance Details
-             </a>
+            <a href="/app/EMC-app-XtremIO/initiators_performance?form.cluster=$form.cluster$&amp;form.initiator=$form.initiator$" target="Initiator Performance">View Performance Details</a>
         </div>
       </html>
     </panel>
@@ -142,10 +159,8 @@
       <title>Latency(µs)</title>
       <chart>
         <search base="baseSearch">
-           <query>| timechart span=1m latest(latency) AS "latency"</query>
+          <query>| timechart latest(latency) AS "latency"</query>
         </search>
-        <option name="charting.chart">line</option>
-        <option name="charting.axisY2.enabled">undefined</option>
         <option name="charting.axisLabelsX.majorLabelStyle.overflowMode">ellipsisNone</option>
         <option name="charting.axisLabelsX.majorLabelStyle.rotation">0</option>
         <option name="charting.axisTitleX.visibility">visible</option>
@@ -154,6 +169,7 @@
         <option name="charting.axisX.scale">linear</option>
         <option name="charting.axisY.scale">linear</option>
         <option name="charting.axisY2.scale">inherit</option>
+        <option name="charting.chart">line</option>
         <option name="charting.chart.bubbleMaximumSize">50</option>
         <option name="charting.chart.bubbleMinimumSize">10</option>
         <option name="charting.chart.bubbleSizeBy">area</option>
@@ -165,12 +181,11 @@
         <option name="charting.layout.splitSeries">0</option>
         <option name="charting.legend.labelStyle.overflowMode">ellipsisMiddle</option>
         <option name="charting.legend.placement">right</option>
-         </chart>
+        <option name="refresh.display">progressbar</option>
+      </chart>
       <html>
        <div class="performance_drilldown">
-            <a href=" /app/EMC-app-XtremIO/initiators_performance?form.cluster=$form.cluster$&amp;form.initiator=$form.initiator$" target="Initiator Performance">
-                    View Performance Details
-             </a>
+            <a href="/app/EMC-app-XtremIO/initiators_performance?form.cluster=$form.cluster$&amp;form.initiator=$form.initiator$" target="Initiator Performance">View Performance Details</a>
         </div>
       </html>
     </panel>
