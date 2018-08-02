@@ -1,286 +1,175 @@
-
-# Application-level permissions
-
 []
 access = read : [ * ], write : [ admin, power ]
-
-### EVENT TYPES
-
-[eventtypes]
-export = system
-
-
-
-### VIEWSTATES: even normal users should be able to create shared viewstates
+export = none
 
 [viewstates]
 access = read : [ * ], write : [ * ]
 export = system
 
-[]
-access = read : [ * ], write : [ admin, power ]
-export = none
-version = 6.2.2
-modtime = 1430375683.880586000
-
-
-[macros/get_xtremio_index]
-access = read : [ * ], write : [ admin, power ]
-export = none
-owner = admin
-version = 6.2.2
-modtime = 1430738562.916663300
-
 [views/events]
-version = 6.2.2
-modtime = 1431997087.322781000
 owner = admin
-export = none
-
-[views/volumes_perfomance]
-version = 6.2.2
-modtime = 1431473528.567071000
-owner = admin
-export = none
-
-[views/initiators_perfomance]
-version = 6.2.2
-modtime = 1431327404.799383000
-owner = admin
-export = none
-
-[views/targets_perfomance]
-version = 6.2.2
-modtime = 1431327436.452703500
-owner = admin
-export = none
+version = 7.0.4
+modtime = 1533174511.490696000
 
 [views/volumes_summary]
-version = 6.2.3
-modtime = 1434449054.778650000
+owner = admin
+version = 7.0.4
+modtime = 1533173240.550775000
 
 [views/initiators_summary]
-version = 6.2.3
-modtime = 1434449176.770917000
+owner = admin
+version = 7.0.4
+modtime = 1533173323.464026000
 
 [views/targets_summary]
-version = 6.2.3
-modtime = 1434449281.381919000
-
+owner = admin
+version = 7.0.4
+modtime = 1533173373.514655000
 
 [views/cluster_performance]
-version = 6.2.2
-modtime = 1432011023.449446000
 owner = admin
-export = none
-
+version = 7.0.4
+modtime = 1533173694.752069000
+owner = admin
 
 [savedsearches/XtremIOSnapshotsLookup]
-access = read : [ * ], write : [ admin, power ]
-export = none
 owner = admin
-version = 6.2.3
-modtime = 1434085555.869169000
-
-[views/events]
-version = 6.2.3
-modtime = 1434443795.916233000
+version = 7.0.4
+modtime = 1533168943.668609000
 
 [savedsearches/XtremIOClustersLookup]
-access = read : [ * ], write : [ admin, power ]
-export = none
 owner = admin
-version = 6.2.3
-modtime = 1434445367.528638000
+version = 7.0.4
+modtime = 1533168535.488056000
 
 [savedsearches/XtremIOxBricksLookup]
-access = read : [ * ], write : [ admin, power ]
-export = none
 owner = admin
-version = 6.2.3
-modtime = 1434085601.030504000
+version = 7.0.4
+modtime = 1533168682.653926000
 
 [savedsearches/XtremIOVolumesLookup]
-access = read : [ * ], write : [ admin, power ]
-export = none
 owner = admin
-version = 6.2.3
-modtime = 1434085614.631657000
-
-
-[savedsearches/XtremIOClusterNameLookup]
-access = read : [ * ], write : [ admin, power ]
-export = none
-version = 6.2.2
-modtime = 1432093397.530718000
-owner = admin
+version = 7.0.4
+modtime = 1533168956.514830000
 
 [savedsearches/XtremIOInitiatorsLookup]
-access = read : [ * ], write : [ admin, power ]
-export = none
-version = 6.2.2
-modtime = 1432093392.071752000
 owner = admin
+version = 7.0.4
+modtime = 1533168906.979892000
 
 [savedsearches/XtremIOTargetsLookup]
-access = read : [ * ], write : [ admin, power ]
-export = none
-version = 6.2.2
-modtime = 1432093389.207923000
 owner = admin
+version = 7.0.4
+modtime = 1533168918.163781000
 
 [savedsearches/XtremIOStorageControllersLookup]
-access = read : [ * ], write : [ admin, power ]
-export = none
-version = 6.2.3
-modtime = 1433309496.274967000
 owner = admin
-
+version = 7.0.4
+modtime = 1533169000.651767000
 
 [views/overview]
-version = 6.2.2
-modtime = 1433818591.516424000
 owner = admin
-export = none
-
-[lookups/XtremIOClusterName.csv]
-access = read : [ * ], write : [ admin, power ]
-export = none
-owner = admin
-version = 6.2.3
-modtime = 1434373163.925590000
-
-[lookups/XtremIOClusters.csv]
-access = read : [ * ], write : [ admin, power ]
-export = none
-owner = admin
-version = 6.2.3
-modtime = 1434373171.153217000
-
-[lookups/XtremIOInitiators.csv]
-access = read : [ * ], write : [ admin, power ]
-export = none
-owner = admin
-version = 6.2.3
-modtime = 1434085144.155905000
-
-[lookups/XtremIOSnapshots.csv]
-access = read : [ * ], write : [ admin, power ]
-export = none
-owner = admin
-version = 6.2.3
-modtime = 1434373196.212528000
-
-[lookups/XtremIOStorageControllers.csv]
-access = read : [ * ], write : [ admin, power ]
-export = none
-owner = admin
-version = 6.2.3
-modtime = 1434373219.308339000
-
-[lookups/XtremIOTargets.csv]
-access = read : [ * ], write : [ admin, power ]
-export = none
-owner = admin
-version = 6.2.3
-modtime = 1434373242.939060000
-
-[lookups/XtremIOVolumes.csv]
-access = read : [ * ], write : [ admin, power ]
-export = none
-owner = admin
-version = 6.2.3
-modtime = 1434373251.885036000
-
-[lookups/XtremIOxBricks.csv]
-access = read : [ * ], write : [ admin, power ]
-export = none
-owner = admin
-version = 6.2.3
-modtime = 1434373281.908280000
-
-[transforms/XtremIOClusterNameLookup]
-access = read : [ * ], write : [ admin, power ]
-export = none
-owner = admin
-version = 6.2.3
-modtime = 1434373313.526388000
+version = 7.0.4
+modtime = 1533174311.723791000
 
 [transforms/XtremIOClustersLookup]
-access = read : [ * ], write : [ admin, power ]
-export = none
 owner = admin
 version = 6.2.3
 modtime = 1434373320.882536000
 
 [transforms/XtremIOInitiatorsLookup]
-access = read : [ * ], write : [ admin, power ]
-export = none
 owner = admin
 version = 6.2.3
 modtime = 1434373328.227936000
 
-
 [transforms/XtremIOSnapshotsLookup]
-access = read : [ * ], write : [ admin, power ]
-export = none
 owner = admin
 version = 6.2.3
 modtime = 1434373339.931606000
 
 [transforms/XtremIOStorageControllersLookup]
-access = read : [ * ], write : [ admin, power ]
-export = none
 owner = admin
 version = 6.2.3
 modtime = 1434373345.973052000
 
 [transforms/XtremIOTargetsLookup]
-access = read : [ * ], write : [ admin, power ]
-export = none
 owner = admin
 version = 6.2.3
 modtime = 1434373372.440838000
 
 [transforms/XtremIOVolumesLookup]
-access = read : [ * ], write : [ admin, power ]
-export = none
 owner = admin
 version = 6.2.3
 modtime = 1434373381.001434000
 
 [transforms/XtremIOxBricksLookup]
-access = read : [ * ], write : [ admin, power ]
-export = none
 owner = admin
 version = 6.2.3
 modtime = 1434373390.020690000
 
-[props/emc%3Axtremio%3Arest/LOOKUP-1_clusterName]
-access = read : [ * ], write : [ admin, power ]
-export = none
-owner = admin
-version = 6.2.3
-modtime = 1434373415.239439000
-
 [macros/bytes_conversion%281%29]
-access = read : [ * ], write : [ admin, power ]
-export = none
 owner = admin
-version = 6.2.3
-modtime = 1434370997.342320000
+version = 7.0.4
+modtime = 1533167767.634288000
 
 [macros/get_performance_parameters]
-access = read : [ * ], write : [ admin, power ]
-export = none
 owner = admin
-version = 6.2.3
-modtime = 1434520403.792754000
+version = 7.0.4
+modtime = 1533167853.136940000
 
 [macros/get_cluster_performance_parameters]
-access = read : [ * ], write : [ admin, power ]
-export = none
 owner = admin
-version = 6.2.3
-modtime = 1434629760.032580000
+version = 7.0.4
+modtime = 1533167824.717271000
 
+[props/emc%3Axtremio%3Arest/EVAL-Cluster%20Name]
+owner = admin
+export = system
+version = 7.0.4
+modtime = 1533084592.342918000
+
+[views/cluster_summary]
+owner = admin
+version = 7.0.4
+modtime = 1533173602.142738000
+
+[views/targets_performance]
+owner = admin
+version = 7.0.4
+modtime = 1533173845.489014000
+
+[views/volumes_performance]
+owner = admin
+version = 7.0.4
+modtime = 1533173484.026638000
+
+[views/initiators_performance]
+owner = admin
+version = 7.0.4
+modtime = 1533173788.120394000
+
+[macros/xtremio_index_filter]
+owner = admin
+version = 7.0.4
+modtime = 1533167905.251046000
+
+[lookups/XtremIOClusters.csv]
+owner = admin
+
+[lookups/XtremIOInitiators.csv]
+owner = admin
+
+[lookups/XtremIOSnapshots.csv]
+owner = admin
+
+[lookups/XtremIOStorageControllers.csv]
+owner = admin
+
+[lookups/XtremIOTargets.csv]
+owner = admin
+
+[lookups/XtremIOVolumes.csv]
+owner = admin
+
+[lookups/XtremIOxBricks.csv]
+owner = admin

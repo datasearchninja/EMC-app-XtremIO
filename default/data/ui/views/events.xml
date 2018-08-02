@@ -1,33 +1,33 @@
 <form>
   <label>Events</label>
-  <search id="baseSearch">
-    <query>| `get_xtremio_index`  sourcetype="emc:xtremio:rest" component=events "Cluster Name"="$cluster$" events.severity= $severity$ events.classification=* events.timestamp=*  events.entity_details=*  events.description=* events.entity=* | dedup events.id,"Cluster Name" | head 10000</query>
-    <earliest>$earliest$</earliest>
-    <latest>$latest$</latest>
-  </search>
   <fieldset submitButton="true" autoRun="true">
     <input type="time" searchWhenChanged="true">
+      <label></label>
       <default>
         <earliest>-4h@m</earliest>
         <latest>now</latest>
       </default>
     </input>
-    <input type="dropdown" token="cluster" searchWhenChanged="true">
-      <label>Cluster</label>
+    <input type="dropdown" token="XtremIO_Server" searchWhenChanged="true">
+      <label>XtremIO Server</label>
       <search>
-        <query>| inputlookup XtremIOClusterNameLookup | table "Cluster Name"</query>
-        <earliest>$earliest$</earliest>
-        <latest>$latest$</latest>
+        <query>| inputlookup XtremIOClustersLookup 
+| stats count by "XtremIO Server"</query>
       </search>
-      <fieldForLabel>Cluster Name</fieldForLabel>
-      <fieldForValue>Cluster Name</fieldForValue>
+      <fieldForLabel>XtremIO Server</fieldForLabel>
+      <fieldForValue>XtremIO Server</fieldForValue>
+      <choice value="*">ALL</choice>
+      <default>*</default>
     </input>
     <input type="multiselect" token="severity" searchWhenChanged="false">
       <label>Severity</label>
-      <!-- The final value will be surrounded by prefix and suffix -->
       <choice value="*">ALL</choice>
-      <populatingSearch earliest="$earliest$" latest="$latest$" fieldForLabel="events.severity" fieldForValue="events.severity">|`get_xtremio_index`  sourcetype="emc:xtremio:rest" component=events "Cluster Name"="$cluster$" | head 10000 | dedup events.severity | table events.severity</populatingSearch>
+      <choice value="critical">critical</choice>
+      <choice value="major">major</choice>
+      <choice value="minor">minor</choice>
+      <choice value="information">information</choice>
       <delimiter> OR events.severity=</delimiter>
+      <default>*</default>
     </input>
   </fieldset>
   <row>
@@ -35,7 +35,8 @@
       <title>Event count by Severity</title>
       <chart>
         <search base="baseSearch">
-          <query>| stats count by events.severity | rename events.severity AS Severity</query>
+          <query>| stats count by severity 
+| rename severity AS Severity</query>
         </search>
         <option name="charting.axisLabelsX.majorLabelStyle.overflowMode">ellipsisNone</option>
         <option name="charting.axisLabelsX.majorLabelStyle.rotation">0</option>
@@ -44,7 +45,7 @@
         <option name="charting.axisTitleY2.visibility">visible</option>
         <option name="charting.axisX.scale">linear</option>
         <option name="charting.axisY.scale">linear</option>
-        <option name="charting.axisY2.enabled">false</option>
+        <option name="charting.axisY2.enabled">0</option>
         <option name="charting.axisY2.scale">inherit</option>
         <option name="charting.chart">bar</option>
         <option name="charting.chart.bubbleMaximumSize">50</option>
@@ -58,16 +59,15 @@
         <option name="charting.layout.splitSeries">0</option>
         <option name="charting.legend.labelStyle.overflowMode">ellipsisMiddle</option>
         <option name="charting.legend.placement">right</option>
+        <option name="refresh.display">progressbar</option>
       </chart>
     </panel>
     <panel>
       <title>Events history</title>
       <chart>
         <search base="baseSearch">
-          <query>| timechart span=10m limit=0 useother=f count by events.severity</query>
+          <query>| timechart count by severity</query>
         </search>
-        <option name="charting.chart">line</option>
-        <option name="charting.axisY2.enabled">undefined</option>
         <option name="charting.axisLabelsX.majorLabelStyle.overflowMode">ellipsisNone</option>
         <option name="charting.axisLabelsX.majorLabelStyle.rotation">0</option>
         <option name="charting.axisTitleX.visibility">visible</option>
@@ -76,6 +76,7 @@
         <option name="charting.axisX.scale">linear</option>
         <option name="charting.axisY.scale">linear</option>
         <option name="charting.axisY2.scale">inherit</option>
+        <option name="charting.chart">line</option>
         <option name="charting.chart.bubbleMaximumSize">50</option>
         <option name="charting.chart.bubbleMinimumSize">10</option>
         <option name="charting.chart.bubbleSizeBy">area</option>
@@ -87,6 +88,7 @@
         <option name="charting.layout.splitSeries">0</option>
         <option name="charting.legend.labelStyle.overflowMode">ellipsisMiddle</option>
         <option name="charting.legend.placement">right</option>
+        <option name="refresh.display">progressbar</option>
       </chart>
     </panel>
   </row>
@@ -95,7 +97,8 @@
       <title>Event count by Entity</title>
       <chart>
         <search base="baseSearch">
-          <query>| stats count by events.entity | rename events.entity AS Entity</query>
+          <query>| stats count by entity 
+| rename entity AS Entity</query>
         </search>
         <option name="charting.axisLabelsX.majorLabelStyle.overflowMode">ellipsisNone</option>
         <option name="charting.axisLabelsX.majorLabelStyle.rotation">0</option>
@@ -104,7 +107,7 @@
         <option name="charting.axisTitleY2.visibility">visible</option>
         <option name="charting.axisX.scale">linear</option>
         <option name="charting.axisY.scale">linear</option>
-        <option name="charting.axisY2.enabled">false</option>
+        <option name="charting.axisY2.enabled">0</option>
         <option name="charting.axisY2.scale">inherit</option>
         <option name="charting.chart">pie</option>
         <option name="charting.chart.bubbleMaximumSize">50</option>
@@ -118,13 +121,15 @@
         <option name="charting.layout.splitSeries">0</option>
         <option name="charting.legend.labelStyle.overflowMode">ellipsisMiddle</option>
         <option name="charting.legend.placement">right</option>
+        <option name="refresh.display">progressbar</option>
       </chart>
     </panel>
     <panel>
       <title>Event count by Classification</title>
       <chart>
         <search base="baseSearch">
-          <query>| stats count by events.classification | rename events.classification AS Classification</query>
+          <query>| stats count by classification 
+| rename classification AS Classification</query>
         </search>
         <option name="charting.axisLabelsX.majorLabelStyle.overflowMode">ellipsisNone</option>
         <option name="charting.axisLabelsX.majorLabelStyle.rotation">0</option>
@@ -133,7 +138,7 @@
         <option name="charting.axisTitleY2.visibility">visible</option>
         <option name="charting.axisX.scale">linear</option>
         <option name="charting.axisY.scale">linear</option>
-        <option name="charting.axisY2.enabled">false</option>
+        <option name="charting.axisY2.enabled">0</option>
         <option name="charting.axisY2.scale">inherit</option>
         <option name="charting.chart">pie</option>
         <option name="charting.chart.bubbleMaximumSize">50</option>
@@ -147,22 +152,23 @@
         <option name="charting.layout.splitSeries">0</option>
         <option name="charting.legend.labelStyle.overflowMode">ellipsisMiddle</option>
         <option name="charting.legend.placement">right</option>
+        <option name="refresh.display">progressbar</option>
       </chart>
     </panel>
   </row>
   <row>
     <panel>
-      <title>Event Information</title>
-      <event>
-        <search base="baseSearch">
-          <query></query>
+      <title>Raw Event Information</title>
+      <table>
+        <search id="baseSearch">
+          <query>`xtremio_index_filter` sourcetype="emc:xtremio:rest" component=events XtremIO_Server="$XtremIO_Server$" events.severity=$severity$ events.classification=* events.timestamp=* events.entity_details=* events.description=* events.entity=*
+          | table _time XtremIO_Server events.*
+          | rename events.* as *
+          </query>
+          <earliest>$earliest$</earliest>
+          <latest>$latest$</latest>
         </search>
-        <option name="wrap">undefined</option>
-        <option name="rowNumbers">undefined</option>
-        <option name="drilldown">row</option>
-        <option name="count">5</option>
-        <option name="dataOverlayMode">none</option>
-      </event>
+      </table>
     </panel>
   </row>
 </form>

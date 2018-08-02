@@ -1,27 +1,41 @@
 <form script="volumes_summary.js" stylesheet="table_decorations.css">
   <label>Volume Summary</label>
-  <search id="baseSearch">
-    <query>| `get_xtremio_index` sourcetype=emc:xtremio:rest component=volumes "Cluster Name"="$cluster$"  content.name="$volume$"| stats values(content.bw) AS bw values(content.iops) AS iops values(content.avg-latency) AS latency by content.name,_time </query>
-    <earliest>-15m</earliest>
-    <latest>now</latest>
-  </search>
   <fieldset submitButton="true" autoRun="true">
     <input type="dropdown" token="cluster" searchWhenChanged="false">
       <label>Cluster</label>
       <search>
-        <query>| inputlookup XtremIOClusterNameLookup |table "Cluster Name"</query>
+        <query>| inputlookup XtremIOClustersLookup
+| table "Cluster Name"</query>
       </search>
-      <earliest>$earliest$</earliest>
-      <latest>$latest$</latest>
       <fieldForLabel>Cluster Name</fieldForLabel>
       <fieldForValue>Cluster Name</fieldForValue>
     </input>
     <input type="dropdown" token="volume" searchWhenChanged="false">
       <label>Volume</label>
-      <!-- The final value will be surrounded by prefix and suffix -->
-      <populatingSearch fieldForLabel="Volume Name" fieldForValue="Volume Name">| inputlookup XtremIOVolumesLookup | search "Cluster Name"="$cluster$" | table "Volume Name"</populatingSearch>
+      <fieldForLabel>Volume Name</fieldForLabel>
+      <fieldForValue>Volume Name</fieldForValue>
+      <search>
+        <query>| inputlookup XtremIOVolumesLookup 
+| search "Cluster Name"="$cluster$" 
+| table "Volume Name"</query>
+      </search>
     </input>
   </fieldset>
+  <row>
+    <panel depends="$neverset$">
+      <title>baseSearch</title>
+      <table>
+        <search id="baseSearch">
+          <query>`xtremio_index_filter` sourcetype=emc:xtremio:rest component=volumes "Cluster Name"="$cluster$" content.name="$volume$" 
+| stats values(content.bw) AS bw values(content.iops) AS iops values(content.avg-latency) AS latency by content.name _time</query>
+          <earliest>-60m</earliest>
+          <latest>now</latest>
+        </search>
+        <option name="count">1</option>
+        <option name="refresh.display">progressbar</option>
+      </table>
+    </panel>
+  </row>
   <row>
     <panel>
       <html>
@@ -29,19 +43,19 @@
         <div id="summary"/> 
       </html>
     </panel>
-     <panel>
+    <panel>
       <title>Snapshot Summary</title>
       <table>
         <search>
-          <query>| inputlookup XtremIOSnapshotsLookup | search "Cluster Name"="$cluster$" "Ancestor Name"="$volume$" | table "Snapshot Name" "Creation Timestamp" "Logical Space Used" "Volume Size" "Total Snapshots" "Total Lun Mappings"</query>
-          <earliest>-1h</earliest>
-          <latest>now</latest>
+          <query>| inputlookup XtremIOSnapshotsLookup where "Cluster Name"="$cluster$" "Ancestor Name"="$volume$" 
+| table "Snapshot Name" "Creation Timestamp" "Logical Space Used" "Volume Size" "Total Snapshots" "Total Lun Mappings"</query>
         </search>
-        <option name="wrap">true</option>
-        <option name="rowNumbers">false</option>
+        <option name="count">5</option>
         <option name="dataOverlayMode">none</option>
         <option name="drilldown">cell</option>
-        <option name="count">5</option>
+        <option name="refresh.display">progressbar</option>
+        <option name="rowNumbers">false</option>
+        <option name="wrap">true</option>
       </table>
     </panel>
   </row>
@@ -50,10 +64,8 @@
       <title>Bandwidth(MB/s)</title>
       <chart>
         <search base="baseSearch">
-          <query>|  timechart span=1m  latest(bw) AS Bandwidth</query>
+          <query>| timechart latest(bw) AS Bandwidth</query>
         </search>
-        <option name="charting.chart">line</option>
-        <option name="charting.axisY2.enabled">undefined</option>
         <option name="charting.axisLabelsX.majorLabelStyle.overflowMode">ellipsisNone</option>
         <option name="charting.axisLabelsX.majorLabelStyle.rotation">0</option>
         <option name="charting.axisTitleX.visibility">visible</option>
@@ -62,6 +74,7 @@
         <option name="charting.axisX.scale">linear</option>
         <option name="charting.axisY.scale">linear</option>
         <option name="charting.axisY2.scale">inherit</option>
+        <option name="charting.chart">line</option>
         <option name="charting.chart.bubbleMaximumSize">50</option>
         <option name="charting.chart.bubbleMinimumSize">10</option>
         <option name="charting.chart.bubbleSizeBy">area</option>
@@ -71,15 +84,13 @@
         <option name="charting.chart.style">shiny</option>
         <option name="charting.drilldown">all</option>
         <option name="charting.layout.splitSeries">0</option>
-		
         <option name="charting.legend.labelStyle.overflowMode">ellipsisMiddle</option>
         <option name="charting.legend.placement">right</option>
-     </chart>
+        <option name="refresh.display">progressbar</option>
+      </chart>
       <html>
        <div class="performance_drilldown">
-            <a href=" /app/EMC-app-XtremIO/volumes_performance?form.cluster=$form.cluster$&amp;form.volume=$form.volume$" target="Volume Performance">
-                    View Performance Details
-             </a>
+            <a href="/app/EMC-app-XtremIO/volumes_performance?form.cluster=$form.cluster$&amp;form.volume=$form.volume$" target="Volume Performance">View Performance Details</a>
         </div>
       </html>
     </panel>
@@ -87,18 +98,18 @@
       <title>IOPS</title>
       <chart>
         <search base="baseSearch">
-          <query>| timechart span=1m  latest(iops) AS "IOPS"</query>
+          <query>| timechart latest(iops) AS "IOPS"</query>
         </search>
-        <option name="charting.chart">line</option>
-        <option name="charting.axisY2.enabled">undefined</option>
         <option name="charting.axisLabelsX.majorLabelStyle.overflowMode">ellipsisNone</option>
         <option name="charting.axisLabelsX.majorLabelStyle.rotation">0</option>
         <option name="charting.axisTitleX.visibility">visible</option>
+        <option name="charting.axisTitleY.text">IOPS</option>
         <option name="charting.axisTitleY.visibility">visible</option>
         <option name="charting.axisTitleY2.visibility">visible</option>
         <option name="charting.axisX.scale">linear</option>
         <option name="charting.axisY.scale">linear</option>
         <option name="charting.axisY2.scale">inherit</option>
+        <option name="charting.chart">line</option>
         <option name="charting.chart.bubbleMaximumSize">50</option>
         <option name="charting.chart.bubbleMinimumSize">10</option>
         <option name="charting.chart.bubbleSizeBy">area</option>
@@ -108,15 +119,13 @@
         <option name="charting.chart.style">shiny</option>
         <option name="charting.drilldown">all</option>
         <option name="charting.layout.splitSeries">0</option>
-		 <option name="charting.axisTitleY.text">IOPS</option>
         <option name="charting.legend.labelStyle.overflowMode">ellipsisMiddle</option>
         <option name="charting.legend.placement">right</option>
-     </chart>
+        <option name="refresh.display">progressbar</option>
+      </chart>
       <html>
        <div class="performance_drilldown">
-            <a href=" /app/EMC-app-XtremIO/volumes_performance?form.cluster=$form.cluster$&amp;form.volume=$form.volume$"  target="Volume Performance">
-                    View Performance Details
-             </a>
+            <a href="/app/EMC-app-XtremIO/volumes_performance?form.cluster=$form.cluster$&amp;form.volume=$form.volume$" target="Volume Performance">View Performance Details</a>
         </div>
       </html>
     </panel>
@@ -124,10 +133,8 @@
       <title>Latency(µs)</title>
       <chart>
         <search base="baseSearch">
-           <query>| timechart span=1m latest(latency) AS "latency"</query>
+          <query>| timechart latest(latency) AS "latency"</query>
         </search>
-        <option name="charting.chart">line</option>
-        <option name="charting.axisY2.enabled">undefined</option>
         <option name="charting.axisLabelsX.majorLabelStyle.overflowMode">ellipsisNone</option>
         <option name="charting.axisLabelsX.majorLabelStyle.rotation">0</option>
         <option name="charting.axisTitleX.visibility">visible</option>
@@ -136,6 +143,7 @@
         <option name="charting.axisX.scale">linear</option>
         <option name="charting.axisY.scale">linear</option>
         <option name="charting.axisY2.scale">inherit</option>
+        <option name="charting.chart">line</option>
         <option name="charting.chart.bubbleMaximumSize">50</option>
         <option name="charting.chart.bubbleMinimumSize">10</option>
         <option name="charting.chart.bubbleSizeBy">area</option>
@@ -147,12 +155,11 @@
         <option name="charting.layout.splitSeries">0</option>
         <option name="charting.legend.labelStyle.overflowMode">ellipsisMiddle</option>
         <option name="charting.legend.placement">right</option>
+        <option name="refresh.display">progressbar</option>
       </chart>
       <html>
        <div class="performance_drilldown">
-            <a href=" /app/EMC-app-XtremIO/volumes_performance?form.cluster=$form.cluster$&amp;form.volume=$form.volume$"  target="Volume Performance">
-                    View Performance Details
-             </a>
+            <a href="/app/EMC-app-XtremIO/volumes_performance?form.cluster=$form.cluster$&amp;form.volume=$form.volume$" target="Volume Performance">View Performance Details</a>
         </div>
       </html>
     </panel>
